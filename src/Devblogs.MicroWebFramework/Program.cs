@@ -1,22 +1,28 @@
-﻿
-var httpListiner = new HttpListener();
+﻿var hostAddress = "http://localhost:9821/";
 
-var httpPrefix = "http://localhost:9821/";
-
-httpListiner.Prefixes.Add(httpPrefix);
-
-
-Console.WriteLine($"start listening to {httpPrefix} ...");
-httpListiner.Start();
-
-var httpContext = httpListiner.GetContext();
-
-
- 
+var host = new HttpListener();
 var requestPipelineStarter = new PipelineBuilder().AddPipe<StarterMiddleware>()
                                                   .AddPipe<ExceptionHandlingMiddleware>()
                                                   .AddPipe<AuthenticationMiddleware>()
                                                   .AddPipe<EndpointMiddleware>()
                                                   .Build();
 
-requestPipelineStarter(httpContext);
+using (HttpListener listener = new HttpListener())
+{
+    listener.Prefixes.Add(hostAddress);
+
+    listener.Start();
+    Console.WriteLine($"Listening for requests on {hostAddress}");
+
+    while (true)
+    {
+        var httpContext = listener.GetContext();
+
+        ThreadPool.QueueUserWorkItem((state) =>
+        {
+            requestPipelineStarter(httpContext);
+        });
+    }
+}
+
+ 
