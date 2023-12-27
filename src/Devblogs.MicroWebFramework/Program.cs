@@ -15,7 +15,7 @@ using (HttpListener host = new HttpListener())
 
     while (true)
     {
-        var httpContext = host.GetContext();
+        var httpContext = await host.GetContextAsync();
 
         ThreadPool.QueueUserWorkItem((state) =>
         {
