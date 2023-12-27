@@ -1,4 +1,4 @@
-﻿namespace Devblogs.MicroWebFramework.Pipes;
+﻿namespace Devblogs.MicroWebFramework.Middleware;
 
 public class StarterMiddleware(Action<HttpListenerContext> next) : MiddlewareBase(next)
 {
@@ -6,8 +6,7 @@ public class StarterMiddleware(Action<HttpListenerContext> next) : MiddlewareBas
     {
         Console.WriteLine($"Start the user request processing process,{httpContext.Request.Url?.AbsolutePath}");
         
-        if (_next is not null)
-                _next(httpContext);
+        _next(httpContext);
         
         httpContext.Response.Close();
     }

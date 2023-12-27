@@ -1,15 +1,12 @@
-﻿namespace Devblogs.MicroWebFramework.Pipes;
+﻿namespace Devblogs.MicroWebFramework.Middleware;
 
-public class ExceptionHandlingMiddleware(Action<HttpListenerContext> next) 
-    : MiddlewareBase(next)
+public class ExceptionHandlingMiddleware(Action<HttpListenerContext> next) : MiddlewareBase(next)
 {
     public override void Handle(HttpListenerContext httpContext)
     {
         try
         {
-            Console.WriteLine("Starting ExceptionHandling...");
-
-            if (_next is not null) _next(httpContext);
+            _next(httpContext);
         }
         catch (Exception ex)
         {

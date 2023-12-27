@@ -1,5 +1,4 @@
-﻿ 
-namespace Devblogs.MicroWebFramework.Pipes;
+﻿namespace Devblogs.MicroWebFramework.Middleware;
 
 public class EndpointMiddleware : MiddlewareBase
 {
