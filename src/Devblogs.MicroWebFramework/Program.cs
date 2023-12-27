@@ -1,22 +1,21 @@
 ﻿var hostAddress = "http://localhost:9821/";
 
-var host = new HttpListener();
 var requestPipelineStarter = new PipelineBuilder().AddPipe<StarterMiddleware>()
                                                   .AddPipe<ExceptionHandlingMiddleware>()
                                                   .AddPipe<AuthenticationMiddleware>()
                                                   .AddPipe<EndpointMiddleware>()
                                                   .Build();
 
-using (HttpListener listener = new HttpListener())
+using (HttpListener host = new HttpListener())
 {
-    listener.Prefixes.Add(hostAddress);
+    host.Prefixes.Add(hostAddress);
 
-    listener.Start();
+    host.Start();
     Console.WriteLine($"Listening for requests on {hostAddress}");
 
     while (true)
     {
-        var httpContext = listener.GetContext();
+        var httpContext = host.GetContext();
 
         ThreadPool.QueueUserWorkItem((state) =>
         {
