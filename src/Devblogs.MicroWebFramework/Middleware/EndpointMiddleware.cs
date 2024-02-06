@@ -2,32 +2,31 @@
 
 public class EndpointMiddleware : MiddlewareBase
 {
-     public EndpointMiddleware(Action<HttpListenerContext> next) : base(next)
+    public EndpointMiddleware(Action<HttpListenerContext> next) : base(next)
     {
 
     }
 
+    private string? GetDefaultAssemblyName => Assembly.GetExecutingAssembly().GetName().Name;
+
     public override void Handle(HttpListenerContext httpContext)
     {
-        //var url = httpContext.Request.Url.AbsolutePath;
+        var url = httpContext.Request.Url?.AbsolutePath ?? throw new NullReferenceException();
 
-        //var parts = url.Split('/');
+        var parts = url.Split('/');
 
-        //var controllerClass = parts[1];
-        //var actionMethod = parts[2];
-        //var userId = parts[3];
+        var controllerName = parts[1];
+        var actionMethod = parts[2];
 
-        //var templateControllerName = $"PipelineDesignPattern.{controllerClass}Controller";
-        //var typeController = Type.GetType(templateControllerName);
-        //MethodInfo method = typeController.GetMethod(actionMethod);
+        //Devblogs.MicroWebFramework.Controllers
+        var templateControllerName = $"{GetDefaultAssemblyName}.Controllers.{controllerName}Controller";
+        var typeController = Type.GetType(templateControllerName, throwOnError: true, ignoreCase: true);
 
-        //var parameterInfos = method.GetParameters();
 
-        //var userIdAsInt = Convert.ChangeType(userId, parameterInfos[0].ParameterType);
+        MethodInfo method = typeController?.GetMethods()
+                                          ?.FirstOrDefault(x => string.Compare(x.Name, actionMethod, ignoreCase: true) == 0) ?? throw new NullReferenceException();
 
-        //var instance = Activator.CreateInstance(typeController, new[] { httpContext });
-        //method.Invoke(instance, new[] { userIdAsInt });
-
-        
+        var instance = Activator.CreateInstance(typeController, new[] { httpContext });
+        method.Invoke(instance, null);
     }
 }
