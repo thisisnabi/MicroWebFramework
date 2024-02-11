@@ -6,22 +6,18 @@ var requestPipelineStarter = new PipelineBuilder().AddPipe<StarterMiddleware>()
                                                   .AddPipe<EndpointMiddleware>()
                                                   .Build();
 
-using (HttpListener host = new HttpListener())
+using HttpListener host = new HttpListener();
+host.Prefixes.Add(hostAddress);
+
+host.Start();
+Console.WriteLine($"Listening for requests on {hostAddress}");
+
+while (true)
 {
-    host.Prefixes.Add(hostAddress);
+    var httpContext = await host.GetContextAsync();
 
-    host.Start();
-    Console.WriteLine($"Listening for requests on {hostAddress}");
-
-    while (true)
+    ThreadPool.QueueUserWorkItem(_ =>
     {
-        var httpContext = await host.GetContextAsync();
-
-        ThreadPool.QueueUserWorkItem((state) =>
-        {
-            requestPipelineStarter(httpContext);
-        });
-    }
+        requestPipelineStarter(httpContext);
+    });
 }
-
- 

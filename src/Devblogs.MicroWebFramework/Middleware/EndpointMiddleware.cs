@@ -1,12 +1,7 @@
 ﻿namespace Devblogs.MicroWebFramework.Middleware;
 
-public class EndpointMiddleware : MiddlewareBase
+public class EndpointMiddleware(Action<HttpListenerContext> next) : MiddlewareBase(next)
 {
-    public EndpointMiddleware(Action<HttpListenerContext> next) : base(next)
-    {
-
-    }
-
     private string? GetDefaultAssemblyName => Assembly.GetExecutingAssembly().GetName().Name;
 
     public override void Handle(HttpListenerContext httpContext)
@@ -24,7 +19,7 @@ public class EndpointMiddleware : MiddlewareBase
 
 
         MethodInfo method = typeController?.GetMethods()
-                                          ?.FirstOrDefault(x => string.Compare(x.Name, actionMethod, ignoreCase: true) == 0) ?? throw new NullReferenceException();
+            .FirstOrDefault(x => String.Compare(x.Name, actionMethod, StringComparison.OrdinalIgnoreCase) == 0) ?? throw new NullReferenceException();
 
         var instance = Activator.CreateInstance(typeController, new[] { httpContext });
         method.Invoke(instance, null);
