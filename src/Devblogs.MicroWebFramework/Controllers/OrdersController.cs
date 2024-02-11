@@ -12,4 +12,10 @@ public class OrdersController : ControllerBase
     {
         Console.WriteLine("all orders...");
     }
+
+    [Route("custom-url/index")]
+    public void CustomRoute()
+    {
+        Console.WriteLine("Called from custom routing.");
+    }
 }
