@@ -1,8 +1,15 @@
 ﻿namespace Devblogs.MicroWebFramework.Middleware;
 
-public class EndpointMiddleware(Action<HttpListenerContext> next) : MiddlewareBase(next)
+public class EndpointMiddleware : MiddlewareBase
 {
+    public EndpointMiddleware(Action<HttpListenerContext> next) : base(next)
+    {
+        _customRoutes = FindAllCustomRoutes();
+    }
+
     private string? GetDefaultAssemblyName => Assembly.GetExecutingAssembly().GetName().Name;
+    private readonly Dictionary<string, MethodInfo> _customRoutes;
+    private Assembly GetDefaultAssembly => Assembly.GetExecutingAssembly();
 
     public override void Handle(HttpListenerContext httpContext)
     {
@@ -14,7 +21,7 @@ public class EndpointMiddleware(Action<HttpListenerContext> next) : MiddlewareBa
         if (_customRoutes.TryGetValue(url, out var actionMethod))
         {
             var actionDeclaringType = actionMethod.DeclaringType ?? throw new NullReferenceException();
-            var controllerInstance = Activator.CreateInstance(actionDeclaringType, [httpContext]);
+            var controllerInstance = Activator.CreateInstance(actionDeclaringType, new { httpContext });
             actionMethod.Invoke(controllerInstance, null);
             return;
         }
@@ -34,7 +41,7 @@ public class EndpointMiddleware(Action<HttpListenerContext> next) : MiddlewareBa
                              string.Compare(x.Name, actionMethodName, StringComparison.OrdinalIgnoreCase) == 0) ??
                      throw new NullReferenceException();
 
-        var instance = Activator.CreateInstance(typeController, [httpContext]);
+        var instance = Activator.CreateInstance(typeController, new { httpContext });
         method.Invoke(instance, null);
     }
 
@@ -52,7 +59,7 @@ public class EndpointMiddleware(Action<HttpListenerContext> next) : MiddlewareBa
             return false;
 
         var actionDeclaringType = actionMethod.DeclaringType ?? throw new NullReferenceException();
-        var controllerInstance = Activator.CreateInstance(actionDeclaringType, [httpContext]);
+        var controllerInstance = Activator.CreateInstance(actionDeclaringType, new { httpContext });
         actionMethod.Invoke(controllerInstance, null);
 
         return true;
@@ -73,4 +80,5 @@ public class EndpointMiddleware(Action<HttpListenerContext> next) : MiddlewareBa
                 return (customPath, method);
             })
             .ToDictionary(keySelector => keySelector.customPath, valueSelector => valueSelector.method);
+
 }
