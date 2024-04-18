@@ -1,11 +1,6 @@
 ﻿namespace Devblogs.MicroWebFramework.Abstractions;
 
-public abstract class ControllerBase
+public abstract class ControllerBase(HttpListenerContext httpContext)
 {
-    protected readonly HttpListenerContext HttpContext;
-
-    public ControllerBase(HttpListenerContext httpContext)
-    {
-        HttpContext = httpContext;
-    }
+    protected readonly HttpListenerContext HttpContext = httpContext;
 }

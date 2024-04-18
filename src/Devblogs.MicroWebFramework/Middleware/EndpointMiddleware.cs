@@ -6,10 +6,10 @@ public class EndpointMiddleware : MiddlewareBase
     {
         _customRoutes = FindAllCustomRoutes();
     }
-    
+
+    private string? GetDefaultAssemblyName => Assembly.GetExecutingAssembly().GetName().Name;
     private readonly Dictionary<string, MethodInfo> _customRoutes;
     private Assembly GetDefaultAssembly => Assembly.GetExecutingAssembly();
-    private string? GetDefaultAssemblyName => GetDefaultAssembly.GetName().Name;
 
     public override void Handle(HttpListenerContext httpContext)
     {
@@ -21,7 +21,7 @@ public class EndpointMiddleware : MiddlewareBase
         if (_customRoutes.TryGetValue(url, out var actionMethod))
         {
             var actionDeclaringType = actionMethod.DeclaringType ?? throw new NullReferenceException();
-            var controllerInstance = Activator.CreateInstance(actionDeclaringType, [httpContext]);
+            var controllerInstance = Activator.CreateInstance(actionDeclaringType, new { httpContext });
             actionMethod.Invoke(controllerInstance, null);
             return;
         }
@@ -41,7 +41,7 @@ public class EndpointMiddleware : MiddlewareBase
                              string.Compare(x.Name, actionMethodName, StringComparison.OrdinalIgnoreCase) == 0) ??
                      throw new NullReferenceException();
 
-        var instance = Activator.CreateInstance(typeController, [httpContext]);
+        var instance = Activator.CreateInstance(typeController, new { httpContext });
         method.Invoke(instance, null);
     }
 
@@ -59,7 +59,7 @@ public class EndpointMiddleware : MiddlewareBase
             return false;
 
         var actionDeclaringType = actionMethod.DeclaringType ?? throw new NullReferenceException();
-        var controllerInstance = Activator.CreateInstance(actionDeclaringType, [httpContext]);
+        var controllerInstance = Activator.CreateInstance(actionDeclaringType, new { httpContext });
         actionMethod.Invoke(controllerInstance, null);
 
         return true;
@@ -80,4 +80,5 @@ public class EndpointMiddleware : MiddlewareBase
                 return (customPath, method);
             })
             .ToDictionary(keySelector => keySelector.customPath, valueSelector => valueSelector.method);
+
 }

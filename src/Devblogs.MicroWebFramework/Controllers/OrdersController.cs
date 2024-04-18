@@ -1,13 +1,7 @@
 ﻿namespace Devblogs.MicroWebFramework.Controllers;
 
-public class OrdersController : ControllerBase
+public class OrdersController(HttpListenerContext httpContext) : ControllerBase(httpContext)
 {
-    public OrdersController(HttpListenerContext httpContext) 
-        : base(httpContext)
-    {
-      
-    }
-
     public void GetAll()
     {
         Console.WriteLine("all orders...");
