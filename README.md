@@ -13,5 +13,4 @@ If you find this project valuable and appreciate the efforts put into simulating
 
 **ThreadPool Usage:** The project efficiently utilizes the ThreadPool for handling concurrent requests, improving the overall performance of the web application.
 
-## Diagram
-![image](https://github.com/thisisnabi/MicroWebFramework/assets/3371886/5a0f747b-fdc4-45d6-907e-36266eff3189)
+
